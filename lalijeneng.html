@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch API with Data Processing and Bootstrap</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Fetch and Display Processed Data</h1>
+    
+    <!-- Input field for API URL -->
+    <div class="form-group">
+      <label for="apiUrl">Enter API URL:</label>
+      <input type="text" id="apiUrl" class="form-control" placeholder="https://jsonplaceholder.typicode.com/posts">
+    </div>
+    
+    <!-- Button to trigger API fetch -->
+    <div class="text-center">
+      <button id="fetchDataBtn" class="btn btn-primary">Fetch Data</button>
+    </div>
+
+    <!-- Container to display the fetched data -->
+    <div id="output" class="mt-4 p-3 border bg-light">Data will appear here...</div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies (jQuery, Popper.js, and Bootstrap JS) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    // Get the input, button, and output elements
+    const apiUrlInput = document.getElementById('apiUrl');
+    const fetchDataBtn = document.getElementById('fetchDataBtn');
+    const outputDiv = document.getElementById('output');
+
+    // Add event listener to the button
+    fetchDataBtn.addEventListener('click', () => {
+      const apiUrl = apiUrlInput.value; // Get the user-inputted API URL
+
+      if (!apiUrl) {
+        outputDiv.innerHTML = '<p class="text-danger">Please enter a valid API URL!</p>';
+        return;
+      }
+
+      // Fetch data from the API
+      fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json(); // Parse the JSON from the response
+        })
+        .then(data => {
+          // Check if the data is an array and process accordingly
+          if (Array.isArray(data)) {
+            outputDiv.innerHTML = createTable(data); // Create a table if data is an array
+          } else {
+            outputDiv.innerHTML = formatObject(data); // Format data if it's a single object
+          }
+        })
+        .catch(error => {
+          // Display an error message if there's an issue
+          outputDiv.innerHTML = `<p class="text-danger">Error fetching data: ${error.message}</p>`;
+        });
+    });
+
+    // Function to create a table from an array of objects
+    function createTable(data) {
+      let table = '<table class="table table-bordered table-striped"><thead><tr>';
+      
+      // Get the keys from the first object to create table headers
+      const headers = Object.keys(data[0]);
+      headers.forEach(header => {
+        table += `<th>${header}</th>`;
+      });
+      table += '</tr></thead><tbody>';
+      
+      // Loop through the data and create rows
+      data.forEach(item => {
+        table += '<tr>';
+        headers.forEach(header => {
+          table += `<td>${item[header]}</td>`;
+        });
+        table += '</tr>';
+      });
+
+      table += '</tbody></table>';
+      return table;
+    }
+
+    // Function to format a single object as key-value pairs
+    function formatObject(data) {
+      let output = '<h3>Data:</h3>';
+      output += '<ul class="list-group">';
+      for (let key in data) {
+        output += `<li class="list-group-item"><strong>${key}:</strong> ${data[key]}</li>`;
+      }
+      output += '</ul>';
+      return output;
+    }
+  </script>
+</body>
+</html>
